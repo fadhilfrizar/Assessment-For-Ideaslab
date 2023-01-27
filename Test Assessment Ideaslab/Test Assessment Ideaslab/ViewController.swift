@@ -75,6 +75,13 @@ class ViewController: UIViewController {
     //MARK: this is for create lines
     //    let canvas = Canvas()
     
+    var line: CAShapeLayer!
+    var startingPoint = CGPoint.zero
+    var imageView: UIImageView!
+    var panGesture: UIPanGestureRecognizer!
+    var rotationGesture: UIRotationGestureRecognizer!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -82,10 +89,35 @@ class ViewController: UIViewController {
         //        canvas.backgroundColor = .white
         //        canvas.frame = view.frame
         
+        
         //MARK: this is for double tap to create a line
         let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap))
         doubleTapGestureRecognizer.numberOfTouchesRequired = 2
         view.addGestureRecognizer(doubleTapGestureRecognizer)
+        
+        
+    }
+    
+    @objc func handlePan(gesture: UIPanGestureRecognizer) {
+        // Get the distance moved in the view's coordinate system
+        let translation = gesture.translation(in: view)
+        
+        // Update the shape layer's position
+        line.position = CGPoint(x: line.position.x + translation.x, y: line.position.y + translation.y)
+        
+        // Reset the gesture recognizer's translation
+        gesture.setTranslation(.zero, in: view)
+    }
+    
+    @objc func handleRotation(gesture: UIRotationGestureRecognizer) {
+        // Get the rotation angle
+        let angle = gesture.rotation
+        
+        // Update the shape layer's transform
+        line.setAffineTransform(line.affineTransform().rotated(by: angle))
+        
+        // Reset the gesture recognizer's rotation
+        gesture.rotation = 0
     }
     
     @objc func handleDoubleTap(sender: UITapGestureRecognizer) {
@@ -103,7 +135,21 @@ class ViewController: UIViewController {
         shapeLayer.path = path.cgPath
         shapeLayer.strokeColor = UIColor.white.cgColor
         shapeLayer.lineWidth = 3
+        
+        self.line = shapeLayer
+        
         view.layer.addSublayer(shapeLayer)
+        
+        //MARK: for moving around
+        panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan))
+        view.addGestureRecognizer(panGesture)
+        
+        
+        //MARK: for rotating around ps: ** i still confused how to rotating flexible or dynamically **
+        rotationGesture = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation))
+        view.addGestureRecognizer(rotationGesture)
+        
     }
 }
+
 
